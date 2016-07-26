@@ -52,6 +52,13 @@ def getCurrentFilename(currentTime, log_dir, prefix):
                                                                              hour=currentTime.hour)
     return os.path.join(log_dir, filename)
 
+# Safely encodes possible non-ASCII characters in the config for logging
+def prepare_for_logging(*args):
+    encoded_strings = []
+    for string in args:
+        encoded_strings.append(string.encode("utf-8", errors="replace"))
+    return encoded_strings
+
 class ClearwaterLogHandler(BaseRotatingHandler):
     def __init__(self, log_directory, logfile_prefix):
         BaseRotatingHandler.__init__(self, "", 'a', encoding=None, delay=True)

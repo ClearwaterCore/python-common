@@ -1,7 +1,5 @@
-# @file setup.py
-#
 # Project Clearwater - IMS in the Cloud
-# Copyright (C) 2013  Metaswitch Networks Ltd
+# Copyright (C) 2016 Metaswitch Networks Ltd
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -32,27 +30,18 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-import logging
-import sys
+# Simple wrapper to call the write_csv_file script with the correct arguments.
 
-from setuptools import setup, Extension
-from logging import StreamHandler
+import argparse
+import os
+from alarms_parser import write_csv_file
 
-_log = logging.getLogger("common")
-_log.setLevel(logging.DEBUG)
-_handler = StreamHandler(sys.stderr)
-_handler.setLevel(logging.DEBUG)
-_log.addHandler(_handler)
+parser = argparse.ArgumentParser()
+parser.add_argument('--alarms-files', nargs="*", type=str, required=True)
+parser.add_argument('--output-dir', type=str, required=True)
+args = parser.parse_args()
 
-setup(
-    name='metaswitchcommon',
-    version='0.1',
-    packages=['metaswitch', 'metaswitch.common'],
-    package_dir={'':'.'},
-    test_suite='metaswitch.common.test',
-    setup_requires=["cffi"],
-    ext_package="metaswitch.common",
-    cffi_modules=["cffi_build.py:ffi"],
-    install_requires=["py-bcrypt", "pycrypto==2.6.1", "pyzmq==16.0.2", "cffi==1.5.2", "monotonic==0.6"],
-    tests_require=["pbr==1.6", "Mock", "phonenumbers==7.1.1"]
-    )
+csv_filename = os.path.join('.', args.output_dir, 'alarms.csv')
+
+write_csv_file(args.alarms_files, csv_filename)
+

@@ -28,16 +28,14 @@ explain-style:
 test: $(ENV_DIR)/bin/python setup.py env
 	$(COMPILER_FLAGS) $(ENV_DIR)/bin/python setup.py test
 
-# TODO This repository doesn't have full code coverage - it should. Some files
-# are temporarily excluded from coverage to make it easier to detect future
-# regressions. We should fix up the coverage when we can
-EXTRA_COVERAGE="metaswitch/common/logging_config.py,metaswitch/common/phonenumber_utils.py,metaswitch/common/simservs.py,metaswitch/common/ifcs.py"
+# We have not written UTs for a number of modules that do not justify it.   Exclude them from coverage results.
+NO_COVERAGE="metaswitch/common/alarms_writer.py,metaswitch/common/alarms_to_dita.py,metaswitch/common/alarms_to_csv.py,metaswitch/common/stats_to_dita.py"
 
 .PHONY: coverage
 coverage: $(ENV_DIR)/bin/coverage setup.py env
 	rm -rf htmlcov/
 	_env/bin/coverage erase
-	$(COMPILER_FLAGS) _env/bin/coverage run --source metaswitch --omit "**/test/**,metaswitch/common/alarms_writer.py,$(EXTRA_COVERAGE)"  setup.py test
+	$(COMPILER_FLAGS) _env/bin/coverage run --source metaswitch --omit "**/test/**,$(NO_COVERAGE)"  setup.py test
 	_env/bin/coverage report -m --fail-under 100
 	_env/bin/coverage html
 
@@ -45,10 +43,9 @@ coverage: $(ENV_DIR)/bin/coverage setup.py env
 env: ${ENV_DIR}/.eggs_installed
 
 $(ENV_DIR)/bin/python:
-	# Set up a fresh virtual environment
+	# Set up a fresh virtual environment.
 	virtualenv --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
-	# We need to pull down >= 17.1 as Mock depends on it. We should probably find out why it wasn't working when set to version 0.7, as mock should have pulled what it needed.
-	$(ENV_DIR)/bin/easy_install "setuptools>=17.1"
+	$(ENV_DIR)/bin/easy_install "setuptools==24"
 	$(ENV_DIR)/bin/easy_install distribute
 	$(ENV_DIR)/bin/pip install cffi
 
